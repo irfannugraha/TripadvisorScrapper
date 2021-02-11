@@ -312,7 +312,7 @@ while (isExcelError == True):
   isExcelError = False
   try:
     df = DataFrame(data)
-    df.to_excel(('/HasilScrap/'+nama+'.xlsx'), index=True, header=True)
+    df.to_excel(('/'+nama+'.xlsx'), index=True, header=True)
   except:
     print('(!!)Terjadi Error, coba tutup file excel "hasil.xlsx" lalu enter', end='\r')
     input()
