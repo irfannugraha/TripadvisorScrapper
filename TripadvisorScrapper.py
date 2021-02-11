@@ -28,7 +28,7 @@ class methodLibrary:
       self.driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
       self.driver.get(link)
     except:
-      print('(!!)Eror code 100, tanya Irfan ya')
+      print('(!!)Eror code 100 (install webdriver gagal), tanya Irfan ya')
       exit()
   
   def input_element_by_xpath(self, xpath, valInpt, isTerimnate=False):
@@ -39,7 +39,7 @@ class methodLibrary:
       return True
     except:
       if isTerimnate:
-        print('(!!)Eror code 101, tanya Irfan ya')
+        print('(!!)Eror code 101 (input elemen dengan xpath gagal), tanya Irfan ya')
         exit()
       else:
         return False
@@ -51,7 +51,7 @@ class methodLibrary:
       return True
     except:
       if isTerimnate:
-        print('(!!)Eror code 102, tanya Irfan ya')
+        print('(!!)Eror code 102 (click tag dengan xpath gagap), tanya Irfan ya')
         exit()
       else:
         return False
@@ -63,7 +63,7 @@ class methodLibrary:
       return True
     except:
       if isTerimnate:
-        print('(!!)Eror code 103, tanya Irfan ya')
+        print('(!!)Eror code 103 (click tag dengan class gagal), tanya Irfan ya')
         exit()
       else:
         return False
@@ -74,7 +74,7 @@ class methodLibrary:
       return True
     except:
       if isTerimnate:
-        print('(!!)Eror code 104, tanya Irfan ya')
+        print('(!!)Eror code 104 (find tag dgn xpath gagal), tanya Irfan ya')
         exit()
       else:
         return False
@@ -83,7 +83,7 @@ class methodLibrary:
     try:
       self.soup = BeautifulSoup(self.driver.page_source, "html.parser")
     except:
-      print('(!!)Eror code 105, tanya Irfan ya')
+      print('(!!)Eror code 105 (install bf4 gagal), tanya Irfan ya')
       exit()
 
   def export_to_bf4(self):
@@ -91,8 +91,19 @@ class methodLibrary:
       soup = BeautifulSoup(self.driver.page_source, "html.parser")
       return soup
     except:
-      print('(!!)Eror code 106, tanya Irfan ya')
+      print('(!!)Eror code 106 (export ke bf4 gagal), tanya Irfan ya')
       exit()
+
+  def most_common(self, dataArr, jumlah):
+    word_counter = {}
+    for item in dataArr:
+        if item in word_counter:
+            word_counter[item] += 1
+        else:
+            word_counter[item] = 1
+    popular_words = sorted(word_counter, key = word_counter.get, reverse = True)
+    top = popular_words[:jumlah]
+    return top
 
 print('++++++++++++++++++++++++++++++++++++++++++')
 print('+       tripadvisor.co.id scrapper       +')
@@ -103,7 +114,7 @@ print('++++++++++++++++++++++++++++++++++++++++++')
 print()
 print()
 link      = input('Link         : ')
-jumlah    = input('Jumlah data  : ')
+jumlah    = input('Jumlah data (kosongkan jika ambil semua data): ')
 bahasa    = input('Bahasa       : ')
 nama      = input('Nama Excel   : ')
 
@@ -138,7 +149,12 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         print('(!!)Bahasa tidak ditemukan')
         exit()
 
-      data = { 'nama' : [], 'Bulan Ulasan' : [], 'rating' : [], 'judul' : [], 'ulasan' : [], 'Tgl Pengalaman' : [], 'jenisTrip' : []}
+      sleep(10)
+      if( web.find_element_by_xpath('//div[contains(@class, "ui_radio")]//label[contains(text(), "Tidak")]', 10) ):
+        web.click_element_by_xpath('//div[contains(@class, "ui_radio")]//label[contains(text(), "Tidak")]')
+
+      sleep(10)
+      data = { 'Nama' : [], 'Lokasi' : [], 'Bulan Ulasan' : [], 'Rating' : [], 'Judul' : [], 'Ulasan' : [], 'Tgl Pengalaman' : [], 'Jenis Trip' : []}
       while idx<jumlah:
         web.click_element_by_xpath('//span[contains(text(), "Selengkapnya")]')
         sleep(10)
@@ -148,13 +164,14 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         reviewTag = soup.findAll(attrs={"class":"Dq9MAugU"})
         for item in reviewTag:
           print('Scrapping ulasan ke '+str(idx), end='\r')
-          data['nama'].append(            item.find(attrs={"class":"ui_header_link"}).get_text() )
-          data['Bulan Ulasan'].append(       sub('<div.*menulis ulasan |</span.*>', '', str(item.find(attrs={"class":"_2fxQ4TOx"})) ) )
-          data['rating'].append(          sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
-          data['judul'].append(           sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
-          data['ulasan'].append(          sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
-          data['Tgl Pengalaman'].append(   sub( '^<span.*:</span> |</span>', '', str(item.find(attrs={"class":"_34Xs-BQm"})) ) )
-          data['jenisTrip'].append(       sub( '^<span.*: </span>|</span>', '', str(item.find(attrs={"class":"_2bVY3aT5"})) ) )
+          data['Nama'].append( item.find(attrs={"class":"ui_header_link"}).get_text() )
+          data['Lokasi'].append( sub('<[^>]*>', '', str(item.find(attrs={"class":"default _3J15flPT small"})) ) )
+          data['Bulan Ulasan'].append( sub('<div.*menulis ulasan |</span.*>', '', str(item.find(attrs={"class":"_2fxQ4TOx"})) ) )
+          data['Rating'].append( sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
+          data['Judul'].append( sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
+          data['Ulasan'].append( sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
+          data['Tgl Pengalaman'].append( sub( '^<span.*:</span> |</span>', '', str(item.find(attrs={"class":"_34Xs-BQm"})) ) )
+          data['Jenis Trip'].append( sub( '^<span.*: </span>|</span>', '', str(item.find(attrs={"class":"_2bVY3aT5"})) ) )
           idx+=1
           if idx>=jumlah:
             break
@@ -179,7 +196,7 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         print('(!!)Bahasa tidak ditemukan')
         exit()    
 
-      data = {'nama':[],'Bulan Ulasan':[],'rating':[],'judul':[],'ulasan':[],'Tgl Pengalaman':[],'jenisTrip':[],}
+      data = {'Nama':[],'Bulan Ulasan':[],'Rating':[],'Judul':[],'Ulasan':[],'Tgl Pengalaman':[],'Jenis Trip':[],}
       while idx<jumlah:
         web.click_element_by_xpath('//div[contains(@data-test-target, "expand-review")]//span[contains(text(), "Selengkapnya")]')
         sleep(10)
@@ -189,13 +206,13 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         reviewTag = soup.findAll(attrs={"data-test-target":"HR_CC_CARD"})
         for item in reviewTag:
           print('Scrapping ulasan ke '+str(idx), end='\r')
-          data['nama'].append(          item.find(attrs={"class":"ui_header_link"}).get_text() )
+          data['Nama'].append(          item.find(attrs={"class":"ui_header_link"}).get_text() )
           data['Bulan Ulasan'].append(     sub('<div.*menulis ulasan |</span.*>', '', str(item.find(attrs={"class":"_2fxQ4TOx"})) ) )
-          data['rating'].append(        sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
-          data['judul'].append(         sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
-          data['ulasan'].append(        sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
+          data['Rating'].append(        sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
+          data['Judul'].append(         sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
+          data['Ulasan'].append(        sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
           data['Tgl Pengalaman'].append( sub( '^<span.*:</span> |</span>', '', str(item.find(attrs={"class":"_34Xs-BQm"})) ) )
-          data['jenisTrip'].append(     sub( '<[^>]*>|Jenis Trip: ', '', str(item.find(attrs={"class":"_2bVY3aT5"})) ) )
+          data['Jenis Trip'].append(     sub( '<[^>]*>|Jenis Trip: ', '', str(item.find(attrs={"class":"_2bVY3aT5"})) ) )
           idx+=1
           if idx>=jumlah:
             break
@@ -220,7 +237,7 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         print('(!!)Bahasa tidak ditemukan')
         exit()
 
-      data = {'nama':[],'Bulan Ulasan':[],'rating':[],'judul':[],'ulasan':[],'Tgl Pengalaman':[]}
+      data = {'Nama':[],'Bulan Ulasan':[],'Rating':[],'Judul':[],'Ulasan':[],'Tgl Pengalaman':[]}
       while idx<jumlah:
         web.click_element_by_xpath('//span[contains(text(), "Selengkapnya")]')
         sleep(10)
@@ -237,11 +254,11 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
 
         for item in reviewTag:
           print('Scrapping ulasan ke '+str(idx), end='\r')
-          data['nama'].append(   sub( '^<div.*<div>|</div></div>', '', str(item.find(attrs={"class":"info_text pointer_cursor"})) ) )
+          data['Nama'].append(   sub( '^<div.*<div>|</div></div>', '', str(item.find(attrs={"class":"info_text pointer_cursor"})) ) )
           data['Bulan Ulasan'].append(  sub( '^<span.*Diulas pada |</span.*>', '', str(item.find(attrs={"class":"ratingDate"})) ) )
-          data['rating'].append(   sub( '^<span.*bubble_|0">.*', '', str(item.find(attrs={"class":"ui_bubble_rating"})) ) )
-          data['judul'].append(  sub( '^<span.*">|</span>.*', '', str(item.find(attrs={"data-test-target":"noQuotes"})) ) )
-          data['ulasan'].append(   sub( '<[^>]*>', '', sub( '^<div.*partial_entry">|</p>.*', '', str(item.find(attrs={"class":"prw_rup prw_reviews_text_summary_hsx"})) ) ) )
+          data['Rating'].append(   sub( '^<span.*bubble_|0">.*', '', str(item.find(attrs={"class":"ui_bubble_rating"})) ) )
+          data['Judul'].append(  sub( '^<span.*">|</span>.*', '', str(item.find(attrs={"data-test-target":"noQuotes"})) ) )
+          data['Ulasan'].append(   sub( '<[^>]*>', '', sub( '^<div.*partial_entry">|</p>.*', '', str(item.find(attrs={"class":"prw_rup prw_reviews_text_summary_hsx"})) ) ) )
           data['Tgl Pengalaman'].append(  sub( '^<div.*:</span> |</div>', '', str(item.find(attrs={"class":"prw_rup prw_reviews_stay_date_hsx"})) ) )
           idx+=1
           if idx>=jumlah:
@@ -268,7 +285,7 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         print('(!!)Bahasa tidak ditemukan')
         exit()  
 
-      data = { 'nama':[],'Bulan Ulasan':[],'rating':[],'judul':[],'ulasan':[],'Tgl Pengalaman':[],'jenisTrip':[]}
+      data = { 'Nama':[],'Bulan Ulasan':[],'Rating':[],'Judul':[],'Ulasan':[],'Tgl Pengalaman':[],'Jenis Trip':[]}
       while idx<jumlah:
         web.click_element_by_xpath('//span[text(), "Selengkapnya"]')
         sleep(10)
@@ -278,13 +295,13 @@ if( (web.find_element_by_xpath('//span[contains(@class, "ui_icon thumbs-up")]', 
         reviewTag = soup.find(attrs={"class":"_7PJap-I0 _3-JlUfTE"}).next_sibling()[0].findAll(attrs={"class":"Dq9MAugU T870kzTX LnVzGwUB"}, recrusive=False)
         for item in reviewTag:
           print('Scrapping ulasan ke '+str(idx), end='\r')
-          data['nama'].append(  item.find(attrs={"class":"ui_header_link"}).get_text() )
+          data['Nama'].append(  item.find(attrs={"class":"ui_header_link"}).get_text() )
           data['Bulan Ulasan'].append( sub('<div.*menulis ulasan |</span.*>', '', str(item.find(attrs={"class":"_2fxQ4TOx"})) ) )
-          data['rating'].append(  sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
-          data['judul'].append( sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
-          data['ulasan'].append(  sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
+          data['Rating'].append(  sub('<div.*bubble_|0">.*', '', str(item.find(attrs={"class":"nf9vGX55"})) ) )
+          data['Judul'].append( sub('<div.*<span>|</span>.*','', str(item.find(attrs={"data-test-target":"review-title"})) ) )
+          data['Ulasan'].append(  sub( '<[^>]*>', '', str(item.find(attrs={"class":"IRsGHoPm"})) ) )
           data['Tgl Pengalaman'].append( sub( '^<span.*:</span> |</span>', '', str(item.find(attrs={"class":"_34Xs-BQm"})) ) )
-          data['jenisTrip'].append( item.find(attrs={"class":'_3tp-5a1G'}).get_text() )
+          data['Jenis Trip'].append( item.find(attrs={"class":'_3tp-5a1G'}).get_text() )
           idx+=1
           if idx>=jumlah:
             break
@@ -312,7 +329,7 @@ while (isExcelError == True):
   isExcelError = False
   try:
     df = DataFrame(data)
-    df.to_excel(('/'+nama+'.xlsx'), index=True, header=True)
+    df.to_excel((nama+'.xlsx'), index=True, header=True)
   except:
     print('(!!)Terjadi Error, coba tutup file excel "hasil.xlsx" lalu enter', end='\r')
     input()
@@ -320,4 +337,35 @@ while (isExcelError == True):
 
 print('Membuat Excel selesai                                                                       ')
 
-print('Hasil disimpan pada "[Lokasi Aplikasi]/HasilScrap/'+nama+'.xlsx"                            ')
+print('Hasil disimpan pada "[Lokasi Aplikasi]/'+nama+'.xlsx"                            ')
+print()
+
+# membuat kesimpulan
+print('Report')
+print('Link               : '+link)
+print('Bahasa yang dicari : '+bahasa)
+print('Jumlah data yg diambil                 : '+idx)
+
+try: 
+  rataRating = sum(data['rating'])/range(data['rating']) 
+  print('Rata rata rating                       : '+rataRating)
+except: 
+  pass
+
+try: 
+  rataJenTrip = web.most_common(data['Jenis Trip']) 
+  print('Alasan terbanyak pengunjung berkunjung : '+rataJenTrip)
+except: 
+  pass
+
+try: 
+  rataTglPeng = web.most_common(data['Tgl Pengalaman']) 
+  print('Pengunjung terbanyak berkunjung di bln : '+rataTglPeng)
+except: 
+  pass
+
+try: 
+  rataLokPeng = web.most_common(data['Lokasi']) 
+  print('Lokasi pengunjung terbanyak pada       : '+rataLokPeng)
+except: 
+  pass
